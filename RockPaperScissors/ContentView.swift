@@ -7,6 +7,36 @@
 
 import SwiftUI
 
+struct Title: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.largeTitle.bold())
+            .foregroundColor(.blue)
+            .padding(.all, 15)
+            .background(.thinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+}
+
+struct Move: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(size: 100))
+            .padding(6)
+            .shadow(color: .black, radius: 8, x: 5, y: 10)
+    }
+}
+
+extension View {
+    func titleStyle() -> some View {
+        modifier(Title())
+    }
+    
+    func moveStyle() -> some View {
+        modifier(Move())
+    }
+}
+
 struct ContentView: View {
     @State private var currentMove = Int.random(in: 0...2)
     @State private var shouldWin = Bool.random()
@@ -21,45 +51,52 @@ struct ContentView: View {
     let losingMoves = ["✂️", "🗿", "📰"]
     
     var body: some View {
-        VStack {
-            Spacer()
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [.teal, .clear]), startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
             VStack {
-                if shouldWin {
-                    Text(winningMoves[currentMove])
-                        .font(.system(size: 100))
-                        .padding()
-                    Text("Win")
-                        .font(.largeTitle)
-                } else {
-                    Text(losingMoves[currentMove])
-                        .font(.system(size: 100))
-                        .padding()
-                    Text("Lose")
-                        .font(.largeTitle)
+                Spacer()
+                Text("ROCK PAPER SCISSORS")
+                    .font(.headline.bold())
+                    .foregroundColor(.white)
+                VStack {
+                    if shouldWin {
+                        Text(winningMoves[currentMove])
+                            .modifier(Move())
+                        Text("Win")
+                            .modifier(Title())
+                    } else {
+                        Text(losingMoves[currentMove])
+                            .modifier(Move())
+                        Text("Lose")
+                            .modifier(Title())
+                    }
                 }
-            }
-            Spacer()
-            Text("Score: \(score)")
-            
-            ForEach(0..<3) { number in
-                Button {
-                    moveTapped(number)
-                } label: {
-                    Text(moves[number])
-                        .font(.system(size: 100))
+                .padding()
+                
+                Text("Score: \(score)")
+                    .font(.headline)
+                
+                ForEach(0..<3) { number in
+                    Button {
+                        moveTapped(number)
+                    } label: {
+                        Text(moves[number])
+                            .modifier(Move())
+                    }
                 }
+                Spacer()
             }
-            Spacer()
-        }
-        .alert(scoreTitle, isPresented: $showingScore) {
-            Button("Continue", action: askQuestion)
-        } message: {
-            Text("Your score is \(score)")
-        }
-        .alert("Game over", isPresented: $isGameOver) {
-            Button("Play again", action: reset)
-        } message: {
-            Text("Your score is \(score)")
+            .alert(scoreTitle, isPresented: $showingScore) {
+                Button("Continue", action: askQuestion)
+            } message: {
+                Text("Your score is \(score)")
+            }
+            .alert("Game over", isPresented: $isGameOver) {
+                Button("Play again", action: reset)
+            } message: {
+                Text("Your score is \(score)")
+            }
         }
     }
     
